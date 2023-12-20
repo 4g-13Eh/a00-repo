@@ -1,0 +1,62 @@
+pipeline {
+  environment {
+    registry = "dedf1sh/trafficlight"
+    registryCredential = 'dedf1sh'
+    image= ''
+    container = 'traffic-api'
+  }
+  agent any
+  tools {nodejs "node"}
+  stages {
+    stage('Cloning Repo') {
+            steps {
+              script {
+                git url:"https://github.com/4g-13Eh/a00-repo.git", branch: "master"
+           }
+         }
+    }
+    stage('Building image') {
+      steps{
+        script {
+          docker.build registry+":$BUILD_NUMBER"
+        }
+      }
+    }
+
+    stage('Install jest-cli') {
+      steps {
+        sh 'npm install jest-cli -g'
+     }
+    }
+
+    stage('Install dependencies') {
+      steps {
+        sh 'npm install'
+      }
+    }
+
+    stage('Run container for testing') {
+      steps {
+        sh "docker run -d -p 3000:3000 --name $container $registry:$BUILD_NUMBER"
+      }
+    }
+    stage('Test') {
+      steps {
+         sh 'npm test'
+      }
+    }
+
+    stage('Remove traffic container') {
+      steps{
+        sh "docker stop $container"
+        sh "docker rm $container"
+      }
+    }
+
+    stage('Remove Unused docker image') {
+      steps{
+        sh "docker rmi $registry:$BUILD_NUMBER"
+      }
+    }
+  }
+}
