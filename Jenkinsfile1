@@ -2,7 +2,6 @@ pipeline {
   environment {
     registry = "dedf1sh/trafficlight"
     registryCredential = 'dedf1sh'
-    image= ''
     container = 'traffic-api'
   }
   agent any
