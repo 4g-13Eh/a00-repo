@@ -24,7 +24,16 @@ pipeline {
 
     stage('Install jest-cli') {
       steps {
-        sh 'npm install jest-cli -g'
+                sh """
+                    PACKAGE=\$(npm ls -g -p |grep jest-cli)
+                    if [ -z \${PACKAGE} ]
+                    then
+                      echo "Installing jest-cli ..."
+                      npm install jest-cli -g
+                    else
+                      echo "jest-cli is already installed!"
+                    fi
+                """
      }
     }
 
